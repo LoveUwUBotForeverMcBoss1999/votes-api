@@ -1,24 +1,32 @@
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, send_from_directory
 import mysql.connector
 from datetime import datetime
+import os
 
-app = Flask(__name__, template_folder='.')
+app = Flask(__name__)
 
 def get_db():
-    return mysql.connector.connect(
-        host="in.leoxstudios.com",
-        user="u3_qmMpg6ebmu",
-        password="ias=Veu^tr@zEfny@sliQpJa",
-        database="s3_MNS-NETWORK"
-    )
+    try:
+        return mysql.connector.connect(
+            host="in.leoxstudios.com",
+            user="u3_qmMpg6ebmu",
+            password="ias=Veu^tr@zEfny@sliQpJa",
+            database="s3_MNS-NETWORK"
+        )
+    except Exception as e:
+        print(f"Database connection error: {e}")
+        return None
 
 @app.route('/')
 def home():
-    return render_template('index.html')
+    return send_from_directory('.', 'index.html')
 
 @app.route('/api/votes/<path:param>')
 def get_votes(param):
     db = get_db()
+    if not db:
+        return jsonify({"error": "Database connection failed"}), 500
+        
     cursor = db.cursor(dictionary=True)
     
     try:
@@ -50,6 +58,9 @@ def get_votes(param):
             })
         return jsonify({"error": "User not found"}), 404
         
+    except Exception as e:
+        print(f"Query error: {e}")
+        return jsonify({"error": "Server error"}), 500
     finally:
         cursor.close()
         db.close()
