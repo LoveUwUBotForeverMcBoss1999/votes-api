@@ -1,6 +1,7 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, send_file
 import mysql.connector
 from datetime import datetime
+import os
 
 app = Flask(__name__)
 
@@ -12,16 +13,18 @@ def get_db():
         database="s3_MNS-NETWORK"
     )
 
+@app.route('/')
+def home():
+    return send_file('index.html')
+
 @app.route('/api/votes/<path:param>')
 def get_votes(param):
     db = get_db()
     cursor = db.cursor(dictionary=True)
     
     try:
-        # Check if param is a number (rank) or string (username)
         try:
             rank = int(param)
-            # Get by rank
             cursor.execute("""
                 SELECT *, ROW_NUMBER() OVER (ORDER BY votes DESC) as rank 
                 FROM votes 
@@ -29,7 +32,6 @@ def get_votes(param):
                 LIMIT 1 OFFSET %s
             """, (rank - 1,))
         except ValueError:
-            # Get by username
             cursor.execute("""
                 WITH ranked_votes AS (
                     SELECT *, ROW_NUMBER() OVER (ORDER BY votes DESC) as rank 
