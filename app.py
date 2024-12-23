@@ -1,9 +1,8 @@
-from flask import Flask, jsonify, send_file
+from flask import Flask, jsonify, render_template
 import mysql.connector
 from datetime import datetime
-import os
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='.')
 
 def get_db():
     return mysql.connector.connect(
@@ -15,7 +14,7 @@ def get_db():
 
 @app.route('/')
 def home():
-    return send_file('index.html')
+    return render_template('index.html')
 
 @app.route('/api/votes/<path:param>')
 def get_votes(param):
