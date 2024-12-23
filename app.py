@@ -1,12 +1,10 @@
 from flask import Flask, jsonify
 import mysql.connector
 from datetime import datetime
-from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)
 
-def get_db_connection():
+def get_db():
     return mysql.connector.connect(
         host="in.leoxstudios.com",
         user="u3_qmMpg6ebmu",
@@ -14,58 +12,46 @@ def get_db_connection():
         database="s3_MNS-NETWORK"
     )
 
-@app.route('/api/votes/<rank>', methods=['GET'])
-def get_votes_by_rank(rank):
+@app.route('/api/votes/<path:param>')
+def get_votes(param):
+    db = get_db()
+    cursor = db.cursor(dictionary=True)
+    
     try:
-        rank = int(rank)
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
+        # Check if param is a number (rank) or string (username)
+        try:
+            rank = int(param)
+            # Get by rank
+            cursor.execute("""
+                SELECT *, ROW_NUMBER() OVER (ORDER BY votes DESC) as rank 
+                FROM votes 
+                ORDER BY votes DESC
+                LIMIT 1 OFFSET %s
+            """, (rank - 1,))
+        except ValueError:
+            # Get by username
+            cursor.execute("""
+                WITH ranked_votes AS (
+                    SELECT *, ROW_NUMBER() OVER (ORDER BY votes DESC) as rank 
+                    FROM votes
+                )
+                SELECT * FROM ranked_votes WHERE last_name = %s
+            """, (param,))
         
-        cursor.execute("""
-            SELECT last_name, votes, last_vote,
-            RANK() OVER (ORDER BY votes DESC) as rank
-            FROM votes
-            ORDER BY votes DESC
-        """)
+        result = cursor.fetchone()
         
-        results = cursor.fetchall()
-        cursor.close()
-        conn.close()
-        
-        if 0 < rank <= len(results):
-            user = results[rank-1]
+        if result:
             return jsonify({
-                "username": user['last_name'],
-                "rank": user['rank'],
-                "votes": user['votes'],
-                "lastVoted": user['last_vote'].strftime("%Y-%m-%d %H:%M:%S")
-            })
-        return jsonify({"error": "Invalid rank"}), 404
-        
-    except ValueError:
-        # Handle username lookup
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
-        
-        cursor.execute("""
-            SELECT last_name, votes, last_vote,
-            RANK() OVER (ORDER BY votes DESC) as rank
-            FROM votes
-            WHERE last_name = %s
-        """, (rank,))
-        
-        user = cursor.fetchone()
-        cursor.close()
-        conn.close()
-        
-        if user:
-            return jsonify({
-                "username": user['last_name'],
-                "rank": user['rank'],
-                "votes": user['votes'],
-                "lastVoted": user['last_vote'].strftime("%Y-%m-%d %H:%M:%S")
+                "username": result['last_name'],
+                "rank": result['rank'],
+                "votes": result['votes'],
+                "lastVoted": result['last_vote'].strftime('%Y-%m-%d %H:%M:%S')
             })
         return jsonify({"error": "User not found"}), 404
+        
+    finally:
+        cursor.close()
+        db.close()
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
