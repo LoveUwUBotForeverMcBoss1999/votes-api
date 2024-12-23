@@ -3,29 +3,30 @@
 <head>
     <title>Votes Leaderboard</title>
     <script>
-        async function loadTopVoters() {
+        async function loadData() {
             const container = document.getElementById('voters');
+            container.innerHTML = '<p>Loading top 10 voters...</p>';
+            
+            const promises = Array.from({length: 10}, (_, i) => 
+                fetch(`/api/votes/${i + 1}`)
+                    .then(res => res.json())
+                    .catch(() => null)
+            );
+
+            const results = await Promise.all(promises);
             container.innerHTML = '';
             
-            // Load top 10 voters
-            for (let i = 1; i <= 10; i++) {
-                try {
-                    const response = await fetch(`/api/votes/${i}`);
-                    const data = await response.json();
-                    
-                    const voterDiv = document.createElement('div');
-                    voterDiv.className = 'voter';
-                    voterDiv.innerHTML = `
-                        <h3>${data.username}</h3>
-                        <p>Rank: ${data.rank}</p>
-                        <p>Votes: ${data.votes}</p>
-                        <p>Last Voted: ${data.lastVoted}</p>
-                    `;
-                    container.appendChild(voterDiv);
-                } catch (error) {
-                    console.error(`Error loading rank ${i}:`, error);
-                }
-            }
+            results.filter(data => data).forEach(data => {
+                const voterDiv = document.createElement('div');
+                voterDiv.className = 'voter';
+                voterDiv.innerHTML = `
+                    <h3>${data.username}</h3>
+                    <p>Rank: ${data.rank}</p>
+                    <p>Votes: ${data.votes}</p>
+                    <p>Last Voted: ${data.lastVoted}</p>
+                `;
+                container.appendChild(voterDiv);
+            });
         }
 
         async function searchUser() {
@@ -36,19 +37,20 @@
                 const response = await fetch(`/api/votes/${username}`);
                 const data = await response.json();
                 
-                const resultDiv = document.getElementById('searchResult');
-                resultDiv.innerHTML = `
-                    <h3>${data.username}</h3>
-                    <p>Rank: ${data.rank}</p>
-                    <p>Votes: ${data.votes}</p>
-                    <p>Last Voted: ${data.lastVoted}</p>
+                document.getElementById('searchResult').innerHTML = `
+                    <div class="voter">
+                        <h3>${data.username}</h3>
+                        <p>Rank: ${data.rank}</p>
+                        <p>Votes: ${data.votes}</p>
+                        <p>Last Voted: ${data.lastVoted}</p>
+                    </div>
                 `;
-            } catch (error) {
+            } catch {
                 document.getElementById('searchResult').innerHTML = 'User not found';
             }
         }
 
-        window.onload = loadTopVoters;
+        window.onload = loadData;
     </script>
     <style>
         body {
