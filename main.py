@@ -1,8 +1,10 @@
 from flask import Flask, jsonify, send_file
+from flask_cors import CORS  # Add this import
 import mysql.connector
 from datetime import datetime
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 
 def get_db():
     return mysql.connector.connect(
