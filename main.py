@@ -1,35 +1,30 @@
-from flask import Flask, jsonify, send_from_directory
+from flask import Flask, jsonify, send_file
 import mysql.connector
 from datetime import datetime
-import os
 
 app = Flask(__name__)
 
 def get_db():
-    try:
-        return mysql.connector.connect(
-            host="in.leoxstudios.com",
-            user="u3_qmMpg6ebmu",
-            password="ias=Veu^tr@zEfny@sliQpJa",
-            database="s3_MNS-NETWORK"
-        )
-    except Exception as e:
-        print(f"Database connection error: {e}")
-        return None
+    return mysql.connector.connect(
+        host="in.leoxstudios.com",
+        user="u3_qmMpg6ebmu",
+        password="ias=Veu^tr@zEfny@sliQpJa",
+        database="s3_MNS-NETWORK"
+    )
 
-@app.route('/')
-def home():
-    return send_from_directory('.', 'index.html')
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def catch_all(path):
+    if not path or path == '/':
+        return send_file('index.html')
+    return app.send_static_file(path)
 
 @app.route('/api/votes/<path:param>')
 def get_votes(param):
-    db = get_db()
-    if not db:
-        return jsonify({"error": "Database connection failed"}), 500
-        
-    cursor = db.cursor(dictionary=True)
-    
     try:
+        db = get_db()
+        cursor = db.cursor(dictionary=True)
+        
         try:
             rank = int(param)
             cursor.execute("""
@@ -59,11 +54,10 @@ def get_votes(param):
         return jsonify({"error": "User not found"}), 404
         
     except Exception as e:
-        print(f"Query error: {e}")
-        return jsonify({"error": "Server error"}), 500
+        return jsonify({"error": str(e)}), 500
     finally:
-        cursor.close()
-        db.close()
+        if 'cursor' in locals(): cursor.close()
+        if 'db' in locals(): db.close()
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0', port=3000)
