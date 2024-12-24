@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:title" content="MNS Network - Vote Leaderboard">
+    <meta property="og:description" content="View top voters and rankings for MNS Network">
+    <meta property="og:image" content="https://mnsnetwork.xyz/logo.png">
+    <title>MNS Network - Leaderboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .vote-table {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .search-input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .search-input:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+    <!-- Navigation -->
+    <nav class="glass-nav fixed w-full z-50">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-8">
+                    <img src="https://mnsnetwork.xyz/logo.png" alt="MNS Network" class="h-10">
+                    <a href="/" class="hover:text-indigo-400">Home</a>
+                    <a href="/index.html" class="hover:text-indigo-400">Vote</a>
+                    <a href="/leaderboard.html" class="text-indigo-400">Leaderboard</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 pt-24 pb-16">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-4xl font-bold text-center mb-8">Top Voters</h1>
+
+            <!-- Search Bar -->
+            <div class="mb-8">
+                <input type="text" id="search" placeholder="Search player..." 
+                       class="search-input w-full px-4 py-2 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+            
+            <!-- Leaderboard Table -->
+            <div class="vote-table rounded-lg overflow-hidden" id="leaderboardTable">
+                <table class="w-full">
+                    <tbody class="divide-y divide-gray-700" id="leaderboardBody">
+                        <!-- Table rows will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Search Results (hidden by default) -->
+            <div class="vote-table rounded-lg overflow-hidden mt-8 hidden" id="searchResults">
+                <table class="w-full">
+                    <tbody class="divide-y divide-gray-700" id="searchResultBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-6 text-center text-gray-400">
+        © 2024 MNS Minecraft Network. All Rights Reserved.
+    </footer>
+
+    <script>
+        // Function to format date
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+        }
+
+        // Function to create a table row
+        function createVoterRow(data) {
+            return `
+                <tr class="hover:bg-gray-800/50">
+                    <td class="px-6 py-4 flex items-center space-x-4">
+                        <img src="https://mc-heads.net/avatar/${data.username}" alt="${data.username}" class="w-10 h-10 rounded">
+                        <span class="font-medium">${data.username}</span>
+                    </td>
+                    <td class="px-6 py-4 text-center">${data.votes} votes</td>
+                    <td class="px-6 py-4 text-right">${formatDate(data.lastVoted)}</td>
+                </tr>
+            `;
+        }
+
+        // Load top 10 voters
+        async function loadLeaderboard() {
+            const leaderboardBody = document.getElementById('leaderboardBody');
+            leaderboardBody.innerHTML = '';
+            
+            for (let i = 1; i <= 10; i++) {
+                try {
+                    const response = await fetch(`/api/votes/${i}`);
+                    const data = await response.json();
+                    if (response.ok) {
+                        leaderboardBody.innerHTML += createVoterRow(data);
+                    }
+                } catch (error) {
+                    console.error('Error loading leaderboard:', error);
+                }
+            }
+        }
+
+        // Search functionality
+        let searchTimeout;
+        document.getElementById('search').addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            const searchTerm = e.target.value.trim();
+            
+            if (searchTerm.length > 0) {
+                searchTimeout = setTimeout(async () => {
+                    try {
+                        const response = await fetch(`/api/votes/${searchTerm}`);
+                        const data = await response.json();
+                        
+                        const searchResults = document.getElementById('searchResults');
+                        const searchResultBody = document.getElementById('searchResultBody');
+                        
+                        if (response.ok) {
+                            searchResults.classList.remove('hidden');
+                            searchResultBody.innerHTML = createVoterRow(data);
+                        } else {
+                            searchResults.classList.remove('hidden');
+                            searchResultBody.innerHTML = `
+                                <tr>
+                                    <td colspan="3" class="px-6 py-4 text-center text-gray-400">
+                                        No results found for "${searchTerm}"
+                                    </td>
+                                </tr>
+                            `;
+                        }
+                    } catch (error) {
+                        console.error('Error searching:', error);
+                    }
+                }, 300);
+            } else {
+                document.getElementById('searchResults').classList.add('hidden');
+            }
+        });
+
+        // Load leaderboard on page load
+        loadLeaderboard();
+    </script>
+</body>
+</html>
