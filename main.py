@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, send_from_directory
+from flask import Flask, jsonify, send_from_directory, redirect
 from flask_cors import CORS
 import mysql.connector
 from datetime import datetime
@@ -19,7 +19,6 @@ def get_db():
         database="s3_MNS-NETWORK"
     )
 
-# Serve index.html for the root route
 # Serve index.html for the root route
 @app.route('/')
 def serve_index():
@@ -69,6 +68,39 @@ def get_votes(param):
                 "lastVoted": result['last_vote'].strftime('%Y-%m-%d %H:%M:%S')
             })
         return jsonify({"error": "User not found"}), 404
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if 'cursor' in locals(): cursor.close()
+        if 'db' in locals(): db.close()
+
+# API route to get the latest vote
+@app.route('/api/votes')
+def get_latest_vote():
+    try:
+        db = get_db()
+        cursor = db.cursor(dictionary=True)
+        
+        cursor.execute("""
+            SELECT *, ROW_NUMBER() OVER (ORDER BY votes DESC) as rank
+            FROM votes
+            ORDER BY last_vote DESC
+            LIMIT 1
+        """)
+        
+        result = cursor.fetchone()
+        
+        if result:
+            playername = result['last_name']
+            return jsonify({
+                "Voter Avatar": f"https://mc-heads.net/avatar/{playername}",
+                "Voter Name": playername,
+                "Total Votes": result['votes'],
+                "Last Voted Time": result['last_vote'].strftime('%Y-%m-%d %H:%M:%S'),
+                "Vote Rank": result['rank']
+            })
+        return jsonify({"error": "No votes found"}), 404
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500
