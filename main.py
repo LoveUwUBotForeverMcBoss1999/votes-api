@@ -20,9 +20,20 @@ def get_db():
     )
 
 # Serve index.html for the root route
+# Serve index.html for the root route
 @app.route('/')
 def serve_index():
     return send_from_directory('.', 'index.html')
+
+# Serve leaderboard.html for the /leaderboard route
+@app.route('/leaderboard')
+def serve_leaderboard():
+    return send_from_directory('.', 'leaderboard.html')
+
+# Redirect /404 to the root route
+@app.route('/404')
+def handle_404():
+    return redirect('/')
 
 # API route for votes
 @app.route('/api/votes/<path:param>')
