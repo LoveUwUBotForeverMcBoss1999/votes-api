@@ -74,7 +74,7 @@
             </div>
             
             <!-- Loading Spinner -->
-            <div class="loading-spinner" id="loadingSpinner">
+            <div class="loading-spinner hidden" id="loadingSpinner">
                 <div></div>
             </div>
 
@@ -83,14 +83,6 @@
                 <table class="w-full">
                     <tbody class="divide-y divide-gray-700" id="leaderboardBody">
                         <!-- Table rows will be populated by JavaScript -->
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Search Results (hidden by default) -->
-            <div class="vote-table rounded-lg overflow-hidden mt-8 hidden" id="searchResults">
-                <table class="w-full">
-                    <tbody class="divide-y divide-gray-700" id="searchResultBody">
                     </tbody>
                 </table>
             </div>
@@ -123,30 +115,37 @@
             `;
         }
 
-        // Load top 10 voters
+        // Load top voters
         async function loadLeaderboard() {
             const leaderboardBody = document.getElementById('leaderboardBody');
             const loadingSpinner = document.getElementById('loadingSpinner');
             const leaderboardTable = document.getElementById('leaderboardTable');
 
             leaderboardBody.innerHTML = '';
-            loadingSpinner.classList.remove('hidden');
             leaderboardTable.classList.add('hidden');
+            
+            const requests = [];
+            const maxRows = 10;
 
-            for (let i = 1; i <= 10; i++) {
-                try {
-                    const response = await fetch(`/api/votes/${i}`);
-                    const data = await response.json();
-                    if (response.ok) {
-                        leaderboardBody.innerHTML += createVoterRow(data);
-                    }
-                } catch (error) {
-                    console.error('Error loading leaderboard:', error);
-                }
+            // Add a timeout to ensure the spinner appears only if loading takes long
+            const spinnerTimeout = setTimeout(() => {
+                loadingSpinner.classList.remove('hidden');
+            }, 300);
+
+            for (let i = 1; i <= maxRows; i++) {
+                requests.push(fetch(`/api/votes/${i}`).then(response => response.ok ? response.json() : null));
             }
 
-            loadingSpinner.classList.add('hidden');
-            leaderboardTable.classList.remove('hidden');
+            const results = await Promise.all(requests);
+            clearTimeout(spinnerTimeout); // Cancel spinner timeout
+
+            // Populate rows with fetched data
+            results.forEach(data => {
+                if (data) leaderboardBody.innerHTML += createVoterRow(data);
+            });
+
+            loadingSpinner.classList.add('hidden'); // Hide spinner
+            leaderboardTable.classList.remove('hidden'); // Show table
         }
 
         // Search functionality
