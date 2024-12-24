@@ -27,23 +27,16 @@
             background: rgba(255, 255, 255, 0.1);
             border-color: rgba(255, 255, 255, 0.2);
         }
-        .loading-spinner {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100px;
+        .loading-placeholder {
+            height: 60px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            animation: placeholder-pulse 0.5s ease-in-out infinite;
         }
-        .loading-spinner div {
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-top: 4px solid #6366f1;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        @keyframes placeholder-pulse {
+            0% { opacity: 0.4; }
+            50% { opacity: 0.6; }
+            100% { opacity: 0.4; }
         }
     </style>
 </head>
@@ -72,10 +65,14 @@
                 <input type="text" id="search" placeholder="Search player..." 
                        class="search-input w-full px-4 py-2 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
             </div>
-            
-            <!-- Loading Spinner -->
-            <div class="loading-spinner hidden" id="loadingSpinner">
-                <div></div>
+
+            <!-- Placeholder Rows (Loading Effect) -->
+            <div id="loadingRows" class="space-y-4">
+                <div class="loading-placeholder"></div>
+                <div class="loading-placeholder"></div>
+                <div class="loading-placeholder"></div>
+                <div class="loading-placeholder"></div>
+                <div class="loading-placeholder"></div>
             </div>
 
             <!-- Leaderboard Table -->
@@ -118,72 +115,30 @@
         // Load top voters
         async function loadLeaderboard() {
             const leaderboardBody = document.getElementById('leaderboardBody');
-            const loadingSpinner = document.getElementById('loadingSpinner');
+            const loadingRows = document.getElementById('loadingRows');
             const leaderboardTable = document.getElementById('leaderboardTable');
 
             leaderboardBody.innerHTML = '';
             leaderboardTable.classList.add('hidden');
-            
+            loadingRows.classList.remove('hidden');
+
             const requests = [];
             const maxRows = 10;
-
-            // Add a timeout to ensure the spinner appears only if loading takes long
-            const spinnerTimeout = setTimeout(() => {
-                loadingSpinner.classList.remove('hidden');
-            }, 300);
 
             for (let i = 1; i <= maxRows; i++) {
                 requests.push(fetch(`/api/votes/${i}`).then(response => response.ok ? response.json() : null));
             }
 
             const results = await Promise.all(requests);
-            clearTimeout(spinnerTimeout); // Cancel spinner timeout
 
             // Populate rows with fetched data
             results.forEach(data => {
                 if (data) leaderboardBody.innerHTML += createVoterRow(data);
             });
 
-            loadingSpinner.classList.add('hidden'); // Hide spinner
+            loadingRows.classList.add('hidden'); // Hide placeholders
             leaderboardTable.classList.remove('hidden'); // Show table
         }
-
-        // Search functionality
-        let searchTimeout;
-        document.getElementById('search').addEventListener('input', (e) => {
-            clearTimeout(searchTimeout);
-            const searchTerm = e.target.value.trim();
-            
-            if (searchTerm.length > 0) {
-                searchTimeout = setTimeout(async () => {
-                    try {
-                        const response = await fetch(`/api/votes/${searchTerm}`);
-                        const data = await response.json();
-                        
-                        const searchResults = document.getElementById('searchResults');
-                        const searchResultBody = document.getElementById('searchResultBody');
-                        
-                        if (response.ok) {
-                            searchResults.classList.remove('hidden');
-                            searchResultBody.innerHTML = createVoterRow(data);
-                        } else {
-                            searchResults.classList.remove('hidden');
-                            searchResultBody.innerHTML = `
-                                <tr>
-                                    <td colspan="3" class="px-6 py-4 text-center text-gray-400">
-                                        No results found for "${searchTerm}"
-                                    </td>
-                                </tr>
-                            `;
-                        }
-                    } catch (error) {
-                        console.error('Error searching:', error);
-                    }
-                }, 300);
-            } else {
-                document.getElementById('searchResults').classList.add('hidden');
-            }
-        });
 
         // Load leaderboard on page load
         loadLeaderboard();
