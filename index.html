@@ -8,58 +8,47 @@
     <meta property="og:description" content="Support MNS Network by voting on various Minecraft server lists">
     <meta property="og:image" content="https://mnsnetwork.xyz/logo.png">
     <title>MNS Network - Vote Sites</title>
-    <link rel="icon" type="image/png" href="https://mnsnetwork.xyz/favicon.ico">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
             --primary-dark: #1a1a1a;
             --secondary-dark: #2d2d2d;
             --text-dark: #ffffff;
+            --accent-dark: #3b82f6;
         }
 
-        .dark {
+        body {
             background-color: var(--primary-dark);
             color: var(--text-dark);
         }
 
-        .dark .bg-white {
+        .dark-card {
             background-color: var(--secondary-dark);
+            border-color: #404040;
         }
 
-        .dark .bg-gray-50 {
+        .dark-input {
             background-color: var(--primary-dark);
-        }
-
-        .dark .text-gray-600 {
-            color: #a0aec0;
-        }
-
-        .logo-container {
-            position: relative;
-            width: 48px;
-            height: 48px;
-            overflow: hidden;
-            border-radius: 50%;
-        }
-
-        .logo-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+            color: var(--text-dark);
+            border-color: #404040;
         }
 
         .tab-content {
             display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
         .tab-content.active {
             display: block;
+            opacity: 1;
         }
 
         .vote-button {
             transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
         }
 
         .vote-button:hover {
@@ -67,156 +56,104 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        .voter-row {
-            transition: all 0.3s ease;
-        }
-
-        .voter-row:hover {
-            transform: scale(1.01);
-        }
-
-        .dark .voter-row:hover {
-            background-color: rgba(59, 130, 246, 0.1);
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
         .fade-in {
             animation: fadeIn 0.5s ease-out forwards;
         }
 
-        @media (max-width: 640px) {
-            .container {
-                padding: 0 1rem;
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
             }
-            
-            .grid {
-                grid-template-columns: 1fr;
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
-            
-            .tab-button {
-                padding: 0.5rem 1rem;
-                font-size: 0.875rem;
-            }
-        }
-
-        .tabs-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .tab-button {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
         }
     </style>
 </head>
-<body class="bg-gray-50 dark:bg-gray-900">
-    <div class="min-h-screen flex flex-col">
-        <header class="bg-blue-600 text-white p-4">
-            <div class="container mx-auto flex items-center justify-between">
-                <div class="logo-container">
-                    <img src="https://mnsnetwork.xyz/logo.png" alt="MNS Network Logo">
-                </div>
-                <h1 class="text-2xl font-bold">MNS MINECRAFT NETWORK</h1>
-                <button onclick="toggleDarkMode()" class="p-2 rounded-full hover:bg-blue-700">
-                    <i class="fas fa-moon"></i>
-                </button>
+<body class="min-h-screen flex flex-col">
+    <header class="dark-header text-white p-4 sticky top-0 z-50">
+        <div class="container mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <img src="https://mnsnetwork.xyz/logo.png" alt="MNS Network Logo" class="w-12 h-12 rounded-full">
+                <h1 class="text-2xl font-bold">MNS Network</h1>
             </div>
-        </header>
+        </div>
+    </header>
 
-        <nav class="bg-white shadow dark:bg-gray-800">
-            <div class="container mx-auto">
-                <div class="tabs-container p-4" role="tablist">
-                    <button onclick="switchTab('welcome')" class="tab-button px-4 py-2 font-medium rounded hover:bg-blue-100 active" role="tab">
-                        <i class="fas fa-vote-yea"></i> Vote
-                    </button>
-                    <button onclick="switchTab('leaderboard')" class="tab-button px-4 py-2 font-medium rounded hover:bg-blue-100" role="tab">
-                        <i class="fas fa-trophy"></i> Leaderboard
-                    </button>
-                    <a href="https://mnsnetwork.xyz/" class="tab-button px-4 py-2 font-medium rounded hover:bg-blue-100">
-                        <i class="fas fa-home"></i> Home
-                    </a>
-                </div>
+    <nav class="dark-card shadow">
+        <div class="container mx-auto flex space-x-4 p-4">
+            <button onclick="switchTab('welcome')" class="tab-button px-4 py-2 font-medium rounded hover:bg-blue-100">Vote</button>
+            <button onclick="switchTab('leaderboard')" class="tab-button px-4 py-2 font-medium rounded hover:bg-blue-100">Leaderboard</button>
+            <a href="https://mnsnetwork.xyz/" class="px-4 py-2 font-medium rounded hover:bg-blue-100">Home</a>
+        </div>
+    </nav>
+
+    <main class="flex-grow container mx-auto p-4">
+        <!-- Welcome Tab -->
+        <div id="welcome" class="tab-content active fade-in">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold mb-4">Vote for MNS Network!</h2>
+                <p>Support us by voting on these platforms:</p>
             </div>
-        </nav>
-
-        <main class="flex-grow container mx-auto p-4">
-            <!-- Welcome Tab -->
-            <div id="welcome" class="tab-content active fade-in">
-                <div class="text-center mb-8">
-                    <div class="flex items-center justify-center space-x-4 mb-4">
-                        <i class="fas fa-swords fa-2x text-blue-500"></i>
-                        <h2 class="text-3xl font-bold">Vote for MNS Network!</h2>
-                    </div>
-                    <p class="text-gray-600 dark:text-gray-400">Join us at mc.mnsnetwork.xyz and support our server by voting!</p>
-                </div>
-                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <!-- Vote buttons same as before, but with dark mode support -->
-                    <a href="https://minecraft.buzz/vote/12835" target="_blank" class="vote-button bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md text-center hover:shadow-lg">
-                        <h3 class="text-xl font-bold mb-2">Minecraft Buzz</h3>
-                        <button class="bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600">Vote Now</button>
-                    </a>
-                    <!-- Add other vote buttons similarly -->
-                </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Repeatable Vote Links -->
+                <a href="https://minecraft.buzz/vote/12835" target="_blank" class="vote-button dark-card p-6 rounded-lg shadow-md text-center">
+                    <h3 class="text-xl font-bold mb-2">Minecraft Buzz</h3>
+                    <button class="bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600">Vote Now</button>
+                </a>
+                <!-- Add more links as needed -->
             </div>
+        </div>
 
-            <!-- Leaderboard Tab (same structure but with dark mode classes) -->
-            <div id="leaderboard" class="tab-content fade-in">
-                <!-- Same content as before but with dark mode support -->
-            </div>
-        </main>
-
-        <footer class="bg-gray-800 text-white mt-8">
-            <div class="container mx-auto py-6 px-4">
-                <div class="flex flex-col md:flex-row justify-between items-center">
-                    <div class="mb-4 md:mb-0">
-                        <div class="logo-container">
-                            <img src="https://mnsnetwork.xyz/logo.png" alt="MNS Network Logo">
-                        </div>
-                    </div>
-                    <div class="text-center md:text-right">
-                        <p>© 2024 MNS Minecraft Network. All Rights Reserved.</p>
-                        <p class="text-gray-400">Join us at mc.mnsnetwork.xyz</p>
+        <!-- Leaderboard Tab -->
+        <div id="leaderboard" class="tab-content fade-in">
+            <div class="dark-card rounded-lg shadow-md p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold">Top Voters Leaderboard</h2>
+                    <div class="flex space-x-2">
+                        <input type="text" id="search" placeholder="Search by username" class="dark-input px-3 py-1 rounded">
+                        <button onclick="searchUser()" class="bg-blue-500 text-white px-4 py-1 rounded">Search</button>
                     </div>
                 </div>
+                <div id="searchResult" class="mb-6"></div>
+                <div class="responsive-table">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 dark:bg-gray-800">
+                            <tr>
+                                <th class="px-6 py-3">Avatar</th>
+                                <th class="px-6 py-3">Rank</th>
+                                <th class="px-6 py-3">Username</th>
+                                <th class="px-6 py-3">Votes</th>
+                                <th class="px-6 py-3">Last Voted</th>
+                            </tr>
+                        </thead>
+                        <tbody id="voters"></tbody>
+                    </table>
+                </div>
             </div>
-        </footer>
-    </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-white p-4">
+        <div class="text-center">© 2024 MNS Network. All rights reserved.</div>
+    </footer>
 
     <script>
-        function toggleDarkMode() {
-            document.body.classList.toggle('dark');
-            localStorage.setItem('darkMode', document.body.classList.contains('dark'));
-        }
-
         function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
-            
-            document.querySelectorAll('.tab-button').forEach(button => {
-                button.classList.remove('bg-blue-100');
-            });
-            event.target.closest('.tab-button').classList.add('bg-blue-100');
         }
 
-        // Rest of the JavaScript functions remain the same
-
-        window.onload = function() {
-            loadData();
-            if (localStorage.getItem('darkMode') === 'true') {
-                document.body.classList.add('dark');
-            }
-        };
+        async function searchUser() {
+            const username = document.getElementById('search').value;
+            if (!username) return;
+            const searchResult = document.getElementById('searchResult');
+            searchResult.textContent = "Searching...";
+            // Simulate search logic
+            setTimeout(() => searchResult.textContent = "User not found.", 1000);
+        }
     </script>
 </body>
 </html>
