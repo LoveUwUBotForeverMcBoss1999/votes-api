@@ -9,64 +9,113 @@
     <meta property="og:image" content="https://mnsnetwork.xyz/logo.png">
     <title>MNS Network - Vote</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .glass-nav {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        :root {
+            --primary: #3a86ff;
+            --primary-dark: #2970e6;
+            --secondary: #8338ec;
+            --secondary-dark: #7026d9;
+            --accent: #ffbe0b;
+            --dark-bg: #121418;
+            --darker-bg: #0a0c0f;
+            --card-bg: #1a1d23;
+            --text-light: #ffffff;
+            --text-gray: #9ba1a6;
+            --border-color: rgba(131, 56, 236, 0.3);
         }
-        .vote-table {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .vote-button {
-            background: linear-gradient(135deg, #6366f1, #4f46e5);
-            transition: all 0.3s ease;
-        }
-        .vote-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-        }
-        .vote-site {
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+            min-height: 100vh;
             display: flex;
-            align-items: center;
-            gap: 1rem;
+            flex-direction: column;
         }
-        .vote-site img {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
+
+        nav {
+            background-color: var(--dark-bg);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-link {
+            position: relative;
+            color: var(--text-light);
+            padding: 0.5rem 1rem;
+            transition: color 0.3s;
+        }
+
+        .nav-link:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            background-color: var(--accent);
+            transition: all 0.3s;
+            transform: translateX(-50%);
+        }
+
+        .nav-link:hover:after {
+            width: 100%;
+        }
+
+        .vote-table {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .vote-button {
+            background-color: var(--primary);
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .vote-button:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        footer {
+            margin-top: auto;
+            background-color: var(--darker-bg);
+            border-top: 1px solid var(--border-color);
         }
     </style>
 </head>
-<body class="bg-gray-900 text-white min-h-screen">
+<body>
     <!-- Navigation -->
-    <nav class="glass-nav fixed w-full z-50">
+    <nav class="py-4">
         <div class="container mx-auto px-4">
-            <div class="flex justify-between items-center py-4">
+            <div class="flex justify-between items-center">
                 <div class="flex items-center space-x-8">
-                    <img src="https://mnsnetwork.xyz/logo.png" alt="MNS Network" class="h-10" style="clip-path: circle(50%);">
-                    <a href="https://mnsnetwork.xyz/" class="hover:text-indigo-400">Home</a>
-                    <a href="/" class="hover:text-indigo-400">Vote</a>
-                    <a href="/leaderboard" class="text-indigo-400">Leaderboard</a>
+                    <a href="https://mnsnetwork.xyz/" class="flex items-center space-x-2">
+                        <img src="https://mnsnetwork.xyz/logo.png" alt="MNS Logo" class="w-10 h-10">
+                        <span class="text-2xl font-bold text-white">MNS Network</span>
+                    </a>
+                    <div class="hidden md:flex items-center space-x-6">
+                        <a href="https://mnsnetwork.xyz/" class="nav-link">Home</a>
+                        <a href="/" class="nav-link">Vote</a>
+                        <a href="/leaderboard" class="nav-link">Leaderboard</a>
+                    </div>
                 </div>
             </div>
         </div>
     </nav>
 
     <!-- Main Content -->
-    <main class="container mx-auto px-4 pt-24 pb-16">
+    <main class="container mx-auto px-4 py-8 flex-grow">
         <div class="max-w-4xl mx-auto">
             <h1 class="text-4xl font-bold text-center mb-8">Vote for MNS Network</h1>
             
-            <!-- Vote Sites Table -->
             <div class="vote-table rounded-lg overflow-hidden">
                 <table class="w-full">
                     <tbody class="divide-y divide-gray-700">
+                        <!-- Minecraft Buzz -->
                         <tr class="hover:bg-gray-800/50">
-                            <td class="px-6 py-4 vote-site">
-                                <img src="https://minecraft.buzz/template/images/logo.png?v=6" alt="Minecraft Buzz">
+                            <td class="px-6 py-4 flex items-center gap-4">
+                                <img src="https://minecraft.buzz/template/images/logo.png?v=6" alt="Minecraft Buzz" class="w-12 h-12 rounded-full">
                                 <span>Minecraft Buzz</span>
                             </td>
                             <td class="px-6 py-4 text-right">Vote Crate Key</td>
@@ -76,9 +125,11 @@
                                 </a>
                             </td>
                         </tr>
+            
+                        <!-- MinecraftServers.ORG -->
                         <tr class="hover:bg-gray-800/50">
-                            <td class="px-6 py-4 vote-site">
-                                <img src="https://mnsnetwork.xyz/minecraftservers.org.jpg" alt="MinecraftServers.ORG">
+                            <td class="px-6 py-4 flex items-center gap-4">
+                                <img src="https://mnsnetwork.xyz/statics/img/minecraftservers.org.jpg" alt="MinecraftServers.ORG" class="w-12 h-12 rounded-full">
                                 <span>MinecraftServers.ORG</span>
                             </td>
                             <td class="px-6 py-4 text-right">Vote Crate Keys</td>
@@ -88,9 +139,11 @@
                                 </a>
                             </td>
                         </tr>
+            
+                        <!-- ServersPact -->
                         <tr class="hover:bg-gray-800/50">
-                            <td class="px-6 py-4 vote-site">
-                                <img src="https://preview.redd.it/variations-to-the-minecraft-logo-v0-0dzqovtefeqd1.png?width=1080&crop=smart&auto=webp&s=e5fe1b8b9ab1a689dd6059f087caca969401592f" alt="ServersPact">
+                            <td class="px-6 py-4 flex items-center gap-4">
+                                <img src="https://preview.redd.it/variations-to-the-minecraft-logo-v0-0dzqovtefeqd1.png?width=1080&crop=smart&auto=webp&s=e5fe1b8b9ab1a689dd6059f087caca969401592f" alt="ServersPact" class="w-12 h-12 rounded-full">
                                 <span>ServersPact</span>
                             </td>
                             <td class="px-6 py-4 text-right">Vote Crate Key</td>
@@ -100,9 +153,11 @@
                                 </a>
                             </td>
                         </tr>
+            
+                        <!-- Minecraft Server List -->
                         <tr class="hover:bg-gray-800/50">
-                            <td class="px-6 py-4 vote-site">
-                                <img src="https://cdn.openart.ai/published/YjlXgyEHpK0YyRlAgKMo/FWY51iKk_Awlf_512.webp" alt="Minecraft Server List">
+                            <td class="px-6 py-4 flex items-center gap-4">
+                                <img src="https://cdn.openart.ai/published/YjlXgyEHpK0YyRlAgKMo/FWY51iKk_Awlf_512.webp" alt="Minecraft Server List" class="w-12 h-12 rounded-full">
                                 <span>Minecraft Server List</span>
                             </td>
                             <td class="px-6 py-4 text-right">Vote Crate Key</td>
@@ -112,9 +167,11 @@
                                 </a>
                             </td>
                         </tr>
+            
+                        <!-- Top MC Servers -->
                         <tr class="hover:bg-gray-800/50">
-                            <td class="px-6 py-4 vote-site">
-                                <img src="https://top-mc-servers.net/assets/img/favicon.png" alt="Top MC Servers">
+                            <td class="px-6 py-4 flex items-center gap-4">
+                                <img src="https://top-mc-servers.net/assets/img/favicon.png" alt="Top MC Servers" class="w-12 h-12 rounded-full">
                                 <span>Top MC Servers</span>
                             </td>
                             <td class="px-6 py-4 text-right">Vote Crate Key</td>
@@ -124,9 +181,11 @@
                                 </a>
                             </td>
                         </tr>
+            
+                        <!-- Top Minecraft Servers -->
                         <tr class="hover:bg-gray-800/50">
-                            <td class="px-6 py-4 vote-site">
-                                <img src="https://topminecraftservers.org/includes/img/favicon/favicon-96x96.png" alt="Top Minecraft Servers">
+                            <td class="px-6 py-4 flex items-center gap-4">
+                                <img src="https://topminecraftservers.org/includes/img/favicon/favicon-96x96.png" alt="Top Minecraft Servers" class="w-12 h-12 rounded-full">
                                 <span>Top Minecraft Servers</span>
                             </td>
                             <td class="px-6 py-4 text-right">Vote Crate Key</td>
@@ -143,8 +202,26 @@
     </main>
 
     <!-- Footer -->
-    <footer class="py-6 text-center text-gray-400">
-        © 2024 MNS Minecraft Network. All Rights Reserved.
+    <footer class="py-8 px-4">
+        <div class="container mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="flex items-center space-x-4 mb-4 md:mb-0">
+                    <img src="https://mnsnetwork.xyz/logo.png" alt="MNS Logo" class="w-8 h-8">
+                    <span class="text-sm text-gray-400">© 2024 MNS Minecraft Network. All Rights Reserved.</span>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <a target="_blank" href="https://discord.mnsnetwork.xyz/" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fab fa-discord fa-lg"></i>
+                    </a>
+                    <a class="text-gray-400 hover:text-white transition-colors" href="https://forum.mnsnetwork.xyz/">
+                        <i class="fas fa-comments"></i>
+                    </a>
+                    <a href="https://mnsnetwork.xyz/tos" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fas fa-file-alt"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
     </footer>
 </body>
 </html>
