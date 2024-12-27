@@ -2,38 +2,91 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" href="https://mnsnetwork.xyz/logo.png" type="image/png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="https://mnsnetwork.xyz/logo.png" type="image/png">
     <meta property="og:title" content="MNS Network - Vote Leaderboard">
     <meta property="og:description" content="View top voters and rankings for MNS Network">
     <meta property="og:image" content="https://mnsnetwork.xyz/logo.png">
     <title>MNS Network - Leaderboard</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .glass-nav {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        :root {
+            --primary: #3a86ff;
+            --primary-dark: #2970e6;
+            --secondary: #8338ec;
+            --secondary-dark: #7026d9;
+            --accent: #ffbe0b;
+            --dark-bg: #121418;
+            --darker-bg: #0a0c0f;
+            --card-bg: #1a1d23;
+            --text-light: #ffffff;
+            --text-gray: #9ba1a6;
+            --border-color: rgba(131, 56, 236, 0.3);
         }
-        .vote-table {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
+
+        nav {
+            background-color: var(--dark-bg);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-link {
+            position: relative;
+            color: var(--text-light);
+            padding: 0.5rem 1rem;
+            transition: color 0.3s;
+        }
+
+        .nav-link:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            background-color: var(--accent);
+            transition: all 0.3s;
+            transform: translateX(-50%);
+        }
+
+        .nav-link:hover:after {
+            width: 100%;
+        }
+
         .search-input {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
         }
+
         .search-input:focus {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.2);
+            border-color: var(--primary);
         }
+
+        .vote-table {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
         .loading-placeholder {
-            height: 60px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            animation: placeholder-pulse 0.5s ease-in-out infinite;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
         }
+
+        footer {
+            margin-top: auto;
+            background-color: var(--darker-bg);
+            border-top: 1px solid var(--border-color);
+        }
+
         @keyframes placeholder-pulse {
             0% { opacity: 0.4; }
             50% { opacity: 0.6; }
@@ -41,42 +94,44 @@
         }
     </style>
 </head>
-<body class="bg-gray-900 text-white min-h-screen">
+<body>
     <!-- Navigation -->
-    <nav class="glass-nav fixed w-full z-50">
+    <nav class="py-4">
         <div class="container mx-auto px-4">
-            <div class="flex justify-between items-center py-4">
+            <div class="flex justify-between items-center">
                 <div class="flex items-center space-x-8">
-                    <img src="https://mnsnetwork.xyz/logo.png" alt="MNS Network" class="h-10" style="clip-path: circle(50%);">
-                    <a href="https://mnsnetwork.xyz/" class="hover:text-indigo-400">Home</a>
-                    <a href="/" class="hover:text-indigo-400">Vote</a>
-                    <a href="/leaderboard" class="text-indigo-400">Leaderboard</a>
+                    <a href="https://mnsnetwork.xyz/" class="flex items-center space-x-2">
+                        <img src="https://mnsnetwork.xyz/logo.png" alt="MNS Logo" class="w-10 h-10">
+                        <span class="text-2xl font-bold text-white">MNS Network</span>
+                    </a>
+                    <div class="hidden md:flex items-center space-x-6">
+                        <a href="https://mnsnetwork.xyz/" class="nav-link">Home</a>
+                        <a href="/" class="nav-link">Vote</a>
+                        <a href="/leaderboard" class="nav-link">Leaderboard</a>
+                    </div>
                 </div>
             </div>
         </div>
     </nav>
 
     <!-- Main Content -->
-    <main class="container mx-auto px-4 pt-24 pb-16">
+    <main class="container mx-auto px-4 py-8 flex-grow">
         <div class="max-w-4xl mx-auto">
             <h1 class="text-4xl font-bold text-center mb-8">Top Voters</h1>
 
-            <!-- Search Bar -->
             <div class="mb-8">
                 <input type="text" id="search" placeholder="Search player..." 
-                       class="search-input w-full px-4 py-2 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                       class="search-input w-full px-4 py-2 rounded-lg text-white focus:outline-none">
             </div>
 
-            <!-- Placeholder Rows (Loading Effect) -->
             <div id="loadingRows" class="space-y-4">
-                <div class="loading-placeholder"></div>
-                <div class="loading-placeholder"></div>
-                <div class="loading-placeholder"></div>
-                <div class="loading-placeholder"></div>
-                <div class="loading-placeholder"></div>
+                <div class="loading-placeholder h-16 rounded-lg"></div>
+                <div class="loading-placeholder h-16 rounded-lg"></div>
+                <div class="loading-placeholder h-16 rounded-lg"></div>
+                <div class="loading-placeholder h-16 rounded-lg"></div>
+                <div class="loading-placeholder h-16 rounded-lg"></div>
             </div>
 
-            <!-- Leaderboard Table -->
             <div class="vote-table rounded-lg overflow-hidden hidden" id="leaderboardTable">
                 <table class="w-full">
                     <tbody class="divide-y divide-gray-700" id="leaderboardBody">
@@ -88,8 +143,26 @@
     </main>
 
     <!-- Footer -->
-    <footer class="py-6 text-center text-gray-400">
-        © 2024 MNS Minecraft Network. All Rights Reserved.
+    <footer class="py-8 px-4">
+        <div class="container mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="flex items-center space-x-4 mb-4 md:mb-0">
+                    <img src="https://mnsnetwork.xyz/logo.png" alt="MNS Logo" class="w-8 h-8">
+                    <span class="text-sm text-gray-400">© 2024 MNS Minecraft Network. All Rights Reserved.</span>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <a target="_blank" href="https://discord.mnsnetwork.xyz/" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fab fa-discord fa-lg"></i>
+                    </a>
+                    <a class="text-gray-400 hover:text-white transition-colors" href="https://forum.mnsnetwork.xyz/">
+                        <i class="fas fa-comments"></i>
+                    </a>
+                    <a href="https://mnsnetwork.xyz/tos" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fas fa-file-alt"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
     </footer>
 
     <script>
